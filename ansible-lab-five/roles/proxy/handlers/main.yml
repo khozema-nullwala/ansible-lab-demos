@@ -1,0 +1,6 @@
+---
+# handlers file for proxy
+  - name: Restart Proxy
+    service:
+      name: nginx
+      state: restarted

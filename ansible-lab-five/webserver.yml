@@ -1,0 +1,34 @@
+---
+- name: Installing Apache Web Server
+  yum:
+    name:
+      - httpd
+      - libsemanage-python
+    state: latest
+
+- name: Copying the index.html file
+  template:
+    src: index.j2
+    dest: /var/www/html/index.html
+
+- name: Starting Services
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+
+- name: Changing the apache web server port number
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    insertafter: '^#Listen '
+    line: 'Listen {{ http_port }}'
+  when: http_port is defined
+  notify:
+    - Restart Apache
+
+- name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes

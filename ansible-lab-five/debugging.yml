@@ -1,0 +1,5 @@
+---
+- name: Debugging Variable Values
+  debug:
+    msg: "Nginx RPM Package - {{ nginx_package_url }}"
+

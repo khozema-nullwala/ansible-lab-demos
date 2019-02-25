@@ -1,0 +1,19 @@
+---
+- name: Installing and Configuring Web Server on target node
+  # Hosts Section
+  hosts:
+    - target
+
+  become: yes
+
+  # Tasks Section
+  tasks:
+    - include_tasks: debugging.yml
+      vars:
+        nginx_package_url: http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-{{ansible_distribution_major_version}}-0.el{{ansible_distribution_major_version}}.ngx.noarch.rpm
+
+  # Roles Section
+  roles:
+    - webserver
+    - proxy
+

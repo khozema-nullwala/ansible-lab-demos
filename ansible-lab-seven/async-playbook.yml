@@ -1,0 +1,12 @@
+---
+  - name: A playbook to test the Asynchronous actions and polling
+    hosts:
+      - target
+    become: yes
+
+    tasks:
+      - name: Simulating a long running operation for 60 sec, wait for up to 120 sec, and poll every 20 sec
+        command: /bin/sleep 60
+        async: 120
+        poll: 5
+  

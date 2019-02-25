@@ -1,0 +1,28 @@
+---
+- name: Installing and Configuring Web Server on target node
+  # Hosts Section
+  hosts:
+    - target
+
+  become: yes
+
+  # Tasks Section
+  tasks:
+    - include_tasks: debugging.yml
+      vars:
+        nginx_package_url: http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-{{ansible_distribution_major_version}}-0.el{{ansible_distribution_major_version}}.ngx.noarch.rpm
+
+    - include_tasks: webserver.yml
+      vars:
+        http_port: 8080
+        greeting: "Ansible for Configuration Management and Deployments"        
+
+    - include_tasks: proxy.yml
+      vars:
+        http_port: 8080
+        node_ip: 192.168.100.101
+        nginx_package_url: http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-{{ansible_distribution_major_version}}-0.el{{ansible_distribution_major_version}}.ngx.noarch.rpm
+
+  handlers:
+    - include_tasks: site_handlers.yml
+

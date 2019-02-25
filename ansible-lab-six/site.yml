@@ -1,0 +1,13 @@
+---
+- name: Installing MySQL Server
+  # Hosts Section
+  hosts:
+    - target
+
+  become: yes
+
+  # Roles Section
+  roles:
+    - role: mysql-server
+
+

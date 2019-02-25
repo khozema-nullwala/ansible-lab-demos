@@ -1,0 +1,47 @@
+---
+  - name: Add Repository mysql-server
+    yum:
+      name: [ "{{ mysql_package_url }}", 'MySQL-python' ] 
+      state: latest
+
+  - name: Disable the repository (pls set --enablerepo=mysql57-community if you use it)
+    lineinfile:
+      path: /etc/yum.repos.d/mysql-community.repo
+      regexp: "^enabled=1"
+      line: "enabled=0"
+  
+  - name: Installing MySQL Community Server
+    yum:
+      name: mysql-community-server
+      state: latest
+      enablerepo: mysql57-community
+  
+  - name: Starting Services
+    service:
+      name: mysqld
+      state: started
+      enabled: yes
+
+  - name: Remove All Anonymous User Accounts
+    mysql_user: 
+      name: '' 
+      host_all: yes 
+      state: absent
+
+  - name: Change root password
+    mysql_user: 
+      name: root 
+      host: "{{ item }}"
+      password: "{{ root_db_password }}"
+    with_items:
+      - 127.0.0.1
+      - ::1
+      - localhost
+
+  - name: Remove Test database if it exist.
+    mysql_db: 
+      name: test 
+      state: absent
+      login_user: root
+      login_password: "{{ root_db_password }}"
+

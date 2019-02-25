@@ -1,0 +1,43 @@
+---
+- name: Installing and Configuring Web Server on target node
+  # Hosts Section
+  hosts: 
+    - target
+  
+  become: yes
+  
+  vars:
+    http_port: 8080
+
+  # Tasks Section
+  tasks:
+    - name: Installing Apache Web Server
+      yum:
+        update_cache: yes
+        name: httpd
+        state: latest
+    - name: Copying the index.html file
+      copy:
+        src: index.html
+        dest: /var/www/html/
+    - name: Start the service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Changing the apache web server port number
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^Listen '
+        insertafter: '^#Listen '
+        line: 'Listen {{ http_port }}'
+      when: http_port is defined
+      notify: 
+        - Restart Apache
+
+  handlers:
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted

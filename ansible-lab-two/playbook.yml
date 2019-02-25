@@ -1,0 +1,93 @@
+---
+- name: Installing and Configuring Web Server on target node
+  # Hosts Section
+  hosts: 
+    - target
+  
+  become: yes
+  
+  vars:
+    greeting: "Ansible for Configuration Management and Deployments"
+    node_ip: 192.168.100.101
+    http_port: 8080
+    nginx_package_url: http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-{{ansible_distribution_major_version}}-0.el{{ansible_distribution_major_version}}.ngx.noarch.rpm
+
+  # Tasks Section
+  tasks:
+    - name: Debugging Variable Values
+      debug:
+        msg: "Nginx RPM Package - {{ nginx_package_url}}"
+
+    - name: Installing Apache Web Server
+      yum:
+        update_cache: yes
+        name:
+          - httpd
+          - libsemanage-python
+        state: latest
+
+    # Setting up Nginx Server
+    - name: Add Repository nginx-release 
+      yum: 
+        name: "{{ nginx_package_url }}"
+        state: present
+
+    - name: disable the repository (pls set --enablerepo=nginx if you use it)
+      lineinfile:
+        path: /etc/yum.repos.d/nginx.repo
+        regexp: "^enabled"
+        line: "enabled=0"
+  
+    - name: Installing Nginx
+      yum:
+        name: nginx
+        state: present
+        enablerepo: nginx
+     
+    - name: Copying the index.html file
+      template:
+        src: index.j2
+        dest: /var/www/html/index.html
+
+    - name: Using Jinja2 template file to modify nginx configuration
+      template: 
+        src: default.j2
+        dest: /etc/nginx/conf.d/default.conf
+      notify:
+        - Restart Proxy
+
+    - name: Changing the apache web server port number
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^Listen '
+        insertafter: '^#Listen '
+        line: 'Listen {{ http_port }}'
+      when: http_port is defined
+      notify: 
+        - Restart Apache
+    
+    - name: Starting Services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items:
+        - httpd
+        - nginx
+
+    - name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+      seboolean:
+        name: httpd_can_network_connect
+        state: yes
+        persistent: yes
+ 
+  handlers:
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
+
+    - name: Restart Proxy
+      service:
+        name: nginx
+        state: restarted

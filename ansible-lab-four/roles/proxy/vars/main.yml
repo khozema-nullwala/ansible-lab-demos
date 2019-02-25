@@ -1,0 +1,5 @@
+---
+# vars file for proxy
+  http_port: 8080
+  node_ip: 192.168.100.101
+  nginx_package_url: http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-{{ansible_distribution_major_version}}-0.el{{ansible_distribution_major_version}}.ngx.noarch.rpm

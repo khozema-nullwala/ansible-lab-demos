@@ -1,0 +1,6 @@
+---
+# vars file for webserver
+
+  http_port: 8080
+  greeting: "Ansible for Configuration Management and Deployments"        
+  
